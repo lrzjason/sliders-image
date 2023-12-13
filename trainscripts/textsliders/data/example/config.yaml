@@ -1,7 +1,6 @@
-prompts_file: "trainscripts/imagesliders/data/prompts-xl.yaml"
+prompts_file: "trainscripts/textsliders/data/prompts.yaml"
 pretrained_model:
-  # name_or_path: "stabilityai/stable-diffusion-xl-base-1.0" # you can also use .ckpt or .safetensors models
-  name_or_path: "F:/models/Stable-diffusion/sdxl/openXL.safetensors"
+  name_or_path: "CompVis/stable-diffusion-v1-4" # you can also use .ckpt or .safetensors models
   v2: false # true if model is v2.x
   v_pred: false # true if model uses v-prediction
 network:
@@ -14,16 +13,16 @@ train:
   noise_scheduler: "ddim" # or "ddpm", "lms", "euler_a"
   iterations: 1000
   lr: 0.0002
-  optimizer: "Adam8bit"
+  optimizer: "AdamW"
   lr_scheduler: "constant"
   max_denoising_steps: 50
 save:
   name: "temp"
   path: "./models"
-  per_steps: 200
-  precision: "float16"
+  per_steps: 500
+  precision: "bfloat16"
 logging:
   use_wandb: false
-  verbose: true
+  verbose: false
 other:
-  use_xformers: false
+  use_xformers: true

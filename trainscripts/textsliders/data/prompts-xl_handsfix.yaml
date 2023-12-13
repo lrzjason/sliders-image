@@ -275,24 +275,24 @@
 #   resolution: 512
 #   dynamic_resolution: false
 #   batch_size: 1
-# - target: "man with hands" # what word for erasing the positive concept from
-#   positive: "good_hands, man"  # concept to erase
-#   unconditional: "drawing, pool hand drawing, unfinished hand drawing, sketch, abstraction" # word to take the difference from the positive concept
-#   neutral: "man" # starting point for conditioning the target
-#   action: "enhance" # erase or enhance
-#   guidance_scale: 4
-#   resolution: 512
-#   dynamic_resolution: false
-#   batch_size: 1
-# - target: "woman with hands" # what word for erasing the positive concept from
-#   positive: "good_hands, woman"  # concept to erase
-#   unconditional: "drawing, pool hand drawing, unfinished hand drawing, sketch, abstraction" # word to take the difference from the positive concept
-#   neutral: "woman" # starting point for conditioning the target
-#   action: "enhance" # erase or enhance
-#   guidance_scale: 4
-#   resolution: 512
-#   dynamic_resolution: false
-#   batch_size: 1
+- target: "man with hands" # what word for erasing the positive concept from
+  positive: "good_hands, man"  # concept to erase
+  unconditional: "drawing, pool hand drawing, unfinished hand drawing, sketch, abstraction" # word to take the difference from the positive concept
+  neutral: "man" # starting point for conditioning the target
+  action: "enhance" # erase or enhance
+  guidance_scale: 4
+  resolution: 512
+  dynamic_resolution: false
+  batch_size: 1
+- target: "woman with hands" # what word for erasing the positive concept from
+  positive: "good_hands, woman"  # concept to erase
+  unconditional: "drawing, pool hand drawing, unfinished hand drawing, sketch, abstraction" # word to take the difference from the positive concept
+  neutral: "woman" # starting point for conditioning the target
+  action: "enhance" # erase or enhance
+  guidance_scale: 4
+  resolution: 512
+  dynamic_resolution: false
+  batch_size: 1
 ####################################################################################################### METAL SLIDER
 # - target: "" # what word for erasing the positive concept from
 #   positive: "made out of metal, metallic style, iron, copper, platinum metal,"  # concept to erase
@@ -493,40 +493,3 @@
 #   resolution: 512
 #   dynamic_resolution: false
 #   batch_size: 1
-
-- target: "young russian man face" # what word for erasing the positive concept from
-  positive: "dark photograph of young russian man face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "young man face" # starting point for conditioning the target
-  action: "enhance" # erase or enhance
-  guidance_scale: 4
-  resolution: 512
-  dynamic_resolution: false
-  batch_size: 1
-- target: "aged russian man face" # what word for erasing the positive concept from
-  positive: "dark photograph of aged russian man face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "aged man face" # starting point for conditioning the target
-  action: "enhance" # erase or enhance
-  guidance_scale: 4
-  resolution: 512
-  dynamic_resolution: false
-  batch_size: 1
-- target: "young russian woman face" # what word for erasing the positive concept from
-  positive: "dark photograph of young russian woman face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "young woman face" # starting point for conditioning the target
-  action: "enhance" # erase or enhance
-  guidance_scale: 4
-  resolution: 512
-  dynamic_resolution: false
-  batch_size: 1
-- target: "aged russian woman face" # what word for erasing the positive concept from
-  positive: "dark photograph of aged russian woman face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "aged woman face" # starting point for conditioning the target
-  action: "enhance" # erase or enhance
-  guidance_scale: 4
-  resolution: 512
-  dynamic_resolution: false
-  batch_size: 1

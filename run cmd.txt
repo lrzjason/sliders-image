@@ -1,0 +1,10 @@
+conda activate sliders
+D:
+cd D:\sliders-image
+
+rem text training
+python trainscripts/textsliders/train_lora_xl.py --attributes "man, woman" --name 'openxl_faceslider' --rank 4 --alpha 1 --config_file "trainscripts/textsliders/data/config-xl.yaml" --device 0
+
+
+rem image training
+python trainscripts/imagesliders/train_lora-scale-xl.py --name "pickapicXL" --rank 4 --alpha 1 --config_file "trainscripts/imagesliders/data/config-xl.yaml" --folder_main "F:/ImageSet/Pickscore_slider_dataset/images_export" --folders "low, high" --scales "-1, 1"

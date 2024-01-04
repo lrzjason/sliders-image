@@ -7,4 +7,4 @@ python trainscripts/textsliders/train_lora_xl.py --attributes "man, woman" --nam
 
 
 rem image training
-python trainscripts/imagesliders/train_lora-scale-xl.py --name "pickapicXL" --rank 4 --alpha 1 --config_file "trainscripts/imagesliders/data/config-xl.yaml" --folder_main "F:/ImageSet/Pickscore_slider_dataset/images_export" --folders "low, high" --scales "-1, 1"
+python trainscripts/imagesliders/train_lora-scale-xl_with_caption.py --name "pickapicXL" --rank 32 --alpha 1 --config_file "trainscripts/imagesliders/data/config-xl.yaml" --folder_main "F:/ImageSet/pickscore_train_10k/images_export" --folders "low, high" --scales "-1, 1" --folder_caption "F:/ImageSet/pickscore_train_10k/captions_export"

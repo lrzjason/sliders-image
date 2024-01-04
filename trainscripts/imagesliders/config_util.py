@@ -38,6 +38,8 @@ class TrainConfig(BaseModel):
     lr_scheduler: str = "constant"
 
     max_denoising_steps: int = 50
+    repeat: int = 1
+    caption_drop_out: float = 0.05
 
 
 class SaveConfig(BaseModel):
@@ -45,6 +47,9 @@ class SaveConfig(BaseModel):
     path: str = "./output"
     per_steps: int = 200
     precision: PRECISION_TYPES = "float32"
+    save_after_steps: int = 0
+    break_after_steps: int = 0
+    save_suffix: str = "ggg"
 
 
 class LoggingConfig(BaseModel):

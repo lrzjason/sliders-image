@@ -1,25 +1,32 @@
 prompts_file: "trainscripts/imagesliders/data/prompts-xl.yaml"
 pretrained_model:
   # name_or_path: "stabilityai/stable-diffusion-xl-base-1.0" # you can also use .ckpt or .safetensors models
-  name_or_path: "F:/models/Stable-diffusion/sdxl/openXL.safetensors"
+  # name_or_path: "F:/models/Stable-diffusion/sdxl/openXL.safetensors"
+  # name_or_path: "F:/models/Stable-diffusion/sdxl/sd_xl_base_1.0_0.9vae.safetensors"
+  name_or_path: "F:/models/Stable-diffusion/sdxl/dreamshaperXL_alpha2Xl10.safetensors"
   v2: false # true if model is v2.x
   v_pred: false # true if model uses v-prediction
 network:
   type: "c3lier" # or "c3lier" or "lierla"
-  rank: 4
+  rank: 32
   alpha: 1.0
   training_method: "noxattn"
 train:
   precision: "bfloat16"
   noise_scheduler: "ddim" # or "ddpm", "lms", "euler_a"
-  iterations: 1000
-  lr: 0.0002
+  iterations: 1
+  repeat: 2
+  lr: 0.00004
   optimizer: "Adam8bit"
   lr_scheduler: "constant"
   max_denoising_steps: 50
+  caption_drop_out: 0.05
 save:
   name: "temp"
+  save_suffix: "ggd"
   path: "./models"
+  save_after_steps: 2000
+  break_after_steps: 0
   per_steps: 200
   precision: "float16"
 logging:

@@ -296,7 +296,9 @@ def predict_noise_xl(
         noise_pred, noise_pred_text, guidance_rescale=guidance_rescale
     )
 
+    # try rescale_noise_cfg
     return guided_target
+    # return noise_pred
 
 
 @torch.no_grad()

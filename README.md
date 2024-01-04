@@ -1,6 +1,8 @@
 # Install Concept Sliders
+```
 conda activate sliders
 python trainscripts/imagesliders/train_lora-scale-xl_with_caption.py --name "pickapicXL" --rank 32 --alpha 1 --config_file "trainscripts/imagesliders/data/config-xl.yaml" --folder_main "F:/ImageSet/pickscore_train_10k/images_export" --folders "low, high" --scales "-1, 1" --folder_caption "F:/ImageSet/pickscore_train_10k/captions_export"
+```
 
 # Concept Sliders
 ###  [Project Website](https://sliders.baulab.info) | [Arxiv Preprint](https://arxiv.org/pdf/2311.12092.pdf) | [Trained Sliders](https://sliders.baulab.info/weights/xl_sliders/) | [Colab Demo](https://colab.research.google.com/github/rohitgandikota/sliders/blob/main/demo_concept_sliders.ipynb) <br>

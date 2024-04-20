@@ -6,7 +6,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from diffusers import UNet2DConditionModel, SchedulerMixin
 from diffusers.image_processor import VaeImageProcessor
 from model_util import SDXL_TEXT_ENCODER_TYPE
-from diffusers.utils import randn_tensor
+from diffusers.utils.torch_utils import randn_tensor
 
 from tqdm import tqdm
 
@@ -376,7 +376,7 @@ def get_add_time_ids(
 
 def get_optimizer(name: str):
     name = name.lower()
-
+    print('name',name)
     if name.startswith("dadapt"):
         import dadaptation
 
@@ -386,7 +386,9 @@ def get_optimizer(name: str):
             return dadaptation.DAdaptLion
         else:
             raise ValueError("DAdapt optimizer must be dadaptadam or dadaptlion")
-
+    elif name == "pagedadamw8bit":
+        import bitsandbytes as bnb
+        return bnb.optim.PagedAdamW8bit
     elif name.endswith("8bit"):  # 検証してない
         import bitsandbytes as bnb
 
@@ -437,7 +439,7 @@ def get_lr_scheduler(
         return torch.optim.lr_scheduler.ConstantLR(optimizer, factor=1, **kwargs)
     elif name == "linear":
         return torch.optim.lr_scheduler.LinearLR(
-            optimizer, factor=0.5, total_iters=max_iterations // 100, **kwargs
+            optimizer, start_factor=0.5, total_iters=max_iterations // 100, **kwargs
         )
     else:
         raise ValueError(

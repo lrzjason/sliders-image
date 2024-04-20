@@ -30,6 +30,7 @@ import config_util
 from config_util import RootConfig
 
 import wandb
+from compel import Compel, ReturnedEmbeddingsType
 
 NUM_IMAGES_PER_PROMPT = 1
 from lora import LoRANetwork, DEFAULT_TARGET_REPLACE, UNET_TARGET_REPLACE_MODULE_CONV
@@ -88,6 +89,10 @@ def train(
         text_encoder.to(device, dtype=weight_dtype)
         text_encoder.requires_grad_(False)
         text_encoder.eval()
+    
+    
+    compel = Compel(tokenizer=[tokenizers[0], tokenizers[1]] , text_encoder=[text_encoders[0], text_encoders[1]], returned_embeddings_type=ReturnedEmbeddingsType.PENULTIMATE_HIDDEN_STATES_NON_NORMALIZED, requires_pooled=[False, True])
+
 
     unet.to(device, dtype=weight_dtype)
     if config.other.use_xformers:
@@ -136,6 +141,7 @@ def train(
     cache = PromptEmbedsCache()
     prompt_pairs: list[PromptEmbedsPair] = []
 
+    img_ext = '.webp'
     with torch.no_grad():
         for settings in prompts:
             print(settings)
@@ -214,14 +220,6 @@ def train(
             # read caption from file
             with open(caption_path, 'r', encoding='utf-8') as f:
                 caption = f.read()
-                # if caption length > 75, find last ',' and truncate after the comma index
-                if len(caption) > 75:
-                    caption_temp = caption
-                    caption = caption[:75]
-                    comma_index = caption_temp.rfind(',',50,75)
-                    # find index inbetween 50 and 75
-                    if comma_index > 0:
-                        caption = caption_temp[:comma_index]
         else:
             print(f"caption drop out")
         
@@ -238,15 +236,30 @@ def train(
                 # prompt_pair: PromptEmbedsPair = prompt_pairs[
                 #     torch.randint(0, len(prompt_pairs), (1,)).item()
                 # ]
-                tex_embs, pool_embs = train_util.encode_prompts_xl(
-                        tokenizers,
-                        text_encoders,
-                        [caption],
-                        num_images_per_prompt=NUM_IMAGES_PER_PROMPT,
-                    )
+                # tex_embs, pool_embs = train_util.encode_prompts_xl(
+                #         tokenizers,
+                #         text_encoders,
+                #         [caption],
+                #         num_images_per_prompt=NUM_IMAGES_PER_PROMPT,
+                #     )
+                
+                # change to use compel
+                tex_embs, pool_embs = compel(caption)
+                
                 caption_embs = PromptEmbedsXL(
                     tex_embs,
                     pool_embs
+                )
+
+                empty_tex_embs, empty_pool_embs = train_util.encode_prompts_xl(
+                            tokenizers,
+                            text_encoders,
+                            [''],
+                            num_images_per_prompt=NUM_IMAGES_PER_PROMPT,
+                        )
+                empty_embs = PromptEmbedsXL(
+                    empty_tex_embs,
+                    empty_pool_embs
                 )
                 
                 for settings in prompts:
@@ -256,8 +269,8 @@ def train(
                         criteria,
                         caption_embs,
                         caption_embs,
-                        caption_embs,
-                        caption_embs,
+                        empty_embs,
+                        empty_embs,
                         settings,
                     )
 
@@ -266,23 +279,30 @@ def train(
                     1, config.train.max_denoising_steps, (1,)
                 ).item()
 
-                height, width = prompt_pair.resolution, prompt_pair.resolution
-                if prompt_pair.dynamic_resolution:
-                    height, width = train_util.get_random_resolution_in_bucket(
-                        prompt_pair.resolution
-                    )
+                # height, width = prompt_pair.resolution, prompt_pair.resolution
+                # if prompt_pair.dynamic_resolution:
+                #     height, width = train_util.get_random_resolution_in_bucket(
+                #         prompt_pair.resolution
+                #     )
 
-                # if config.logging.verbose:
-                #     print("guidance_scale:", prompt_pair.guidance_scale)
-                #     print("resolution:", prompt_pair.resolution)
-                #     print("dynamic_resolution:", prompt_pair.dynamic_resolution)
-                #     if prompt_pair.dynamic_resolution:
-                #         print("bucketed resolution:", (height, width))
-                #     print("batch_size:", prompt_pair.batch_size)
-                #     print("dynamic_crops:", prompt_pair.dynamic_crops)
+                if config.logging.verbose:
+                    print("guidance_scale:", prompt_pair.guidance_scale)
+                    print("resolution:", prompt_pair.resolution)
+                    print("dynamic_resolution:", prompt_pair.dynamic_resolution)
+                    if prompt_pair.dynamic_resolution:
+                        print("bucketed resolution:", (height, width))
+                    print("batch_size:", prompt_pair.batch_size)
+                    print("dynamic_crops:", prompt_pair.dynamic_crops)
 
-                img1 = Image.open(f'{folder_main}/{folder1}/{caption_name}.png').resize((512,512))
-                img2 = Image.open(f'{folder_main}/{folder2}/{caption_name}.png').resize((512,512))
+                img1 = Image.open(f'{folder_main}/{folder1}/{caption_name}{img_ext}')
+                img2 = Image.open(f'{folder_main}/{folder2}/{caption_name}{img_ext}')
+                # width,height = (img2.width//2,img2.height//2)
+                # print(f'resize_width_height:{width},{height}')
+                # img2.resize(width,height)
+                # # image1 resize to image2 width height
+                # img1.resize(width,height)
+                width = img2.width
+                height = img2.height
 
                 seed = random.randint(0,2*15)
                 
@@ -406,6 +426,10 @@ def train(
             
             loss_high = criteria(target_latents_high, high_noise.to(torch.float32))
             pbar.set_description(f"Loss*1k: {loss_high.item()*1000:.4f}")
+            if config.logging.use_wandb:
+                wandb.log(
+                    {"loss_high": loss_high, "iteration": i, "lr": lr_scheduler.get_last_lr()[0]}
+                )
             loss_high.backward()
             
             # opposite
@@ -438,6 +462,10 @@ def train(
             
             loss_low = criteria(target_latents_low, low_noise.to(torch.float32))
             pbar.set_description(f"Loss*1k: {loss_low.item()*1000:.4f}")
+            if config.logging.use_wandb:
+                wandb.log(
+                    {"loss_low": loss_low, "iteration": i, "lr": lr_scheduler.get_last_lr()[0]}
+                )
             loss_low.backward()
             
             

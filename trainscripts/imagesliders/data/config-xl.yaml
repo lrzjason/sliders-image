@@ -3,34 +3,36 @@ pretrained_model:
   # name_or_path: "stabilityai/stable-diffusion-xl-base-1.0" # you can also use .ckpt or .safetensors models
   # name_or_path: "F:/models/Stable-diffusion/sdxl/openXL.safetensors"
   # name_or_path: "F:/models/Stable-diffusion/sdxl/sd_xl_base_1.0_0.9vae.safetensors"
-  name_or_path: "F:/models/Stable-diffusion/sdxl/dreamshaperXL_alpha2Xl10.safetensors"
+  # name_or_path: "F:/models/Stable-diffusion/sdxl/openxl15_1_00001_.safetensors"
+  name_or_path: "F:/models/Stable-diffusion/sdxl/o2/openxl2_014.safetensors"
   v2: false # true if model is v2.x
   v_pred: false # true if model uses v-prediction
 network:
   type: "c3lier" # or "c3lier" or "lierla"
-  rank: 32
-  alpha: 1.0
+  rank: 16
+  alpha: 8.0
   training_method: "noxattn"
 train:
   precision: "bfloat16"
   noise_scheduler: "ddim" # or "ddpm", "lms", "euler_a"
   iterations: 1
-  repeat: 2
-  lr: 0.00004
-  optimizer: "Adam8bit"
-  lr_scheduler: "constant"
+  repeat: 1
+  lr: 0.0001
+  optimizer: "adam8bit"
+  lr_scheduler: "linear"
+  # optimizer_args: "decouple=True weight_decay=0.01 d_coef=2 use_bias_correction=True safeguard_warmup=True betas=0.9,0.999"
   max_denoising_steps: 50
   caption_drop_out: 0.05
 save:
-  name: "temp"
-  save_suffix: "ggd"
+  name: "openxl_pag"
+  save_suffix: "zzb"
   path: "./models"
-  save_after_steps: 2000
+  save_after_steps: 0
   break_after_steps: 0
-  per_steps: 200
+  per_steps: 100
   precision: "float16"
 logging:
-  use_wandb: false
+  use_wandb: true
   verbose: true
 other:
   use_xformers: false

@@ -83,6 +83,27 @@ def train(
     unet.requires_grad_(False)
     unet.eval()
 
+    # load teacher model
+    (
+        teacher_tokenizers,
+        teacher_text_encoders,
+        teacher_unet,
+        teacher_noise_scheduler,
+    ) = model_util.load_models_xl(
+        config.pretrained_model.teacher_model,
+        scheduler_name=config.train.noise_scheduler,
+    )
+    for teacher_text_encoder in teacher_text_encoders:
+        teacher_text_encoder.to(device, dtype=weight_dtype)
+        teacher_text_encoder.requires_grad_(False)
+        teacher_text_encoder.eval()
+
+    teacher_unet.to(device, dtype=weight_dtype)
+    if config.other.use_xformers:
+        teacher_unet.enable_xformers_memory_efficient_attention()
+    teacher_unet.requires_grad_(False)
+    teacher_unet.eval()
+
     network = LoRANetwork(
         unet,
         rank=config.network.rank,
@@ -125,6 +146,7 @@ def train(
             print(settings)
             for prompt in [
                 settings.target,
+                # for teacher
                 settings.target_unconditional,
                 settings.positive,
                 settings.neutral,
@@ -170,6 +192,9 @@ def train(
             noise_scheduler.set_timesteps(
                 config.train.max_denoising_steps, device=device
             )
+            teacher_noise_scheduler.set_timesteps(
+                config.train.max_denoising_steps, device=device
+            )
 
             optimizer.zero_grad()
 
@@ -199,6 +224,11 @@ def train(
 
             latents = train_util.get_initial_latents(
                 noise_scheduler, prompt_pair.batch_size, height, width, 1
+            ).to(device, dtype=weight_dtype)
+
+            # create teacher latents
+            teacher_latents = train_util.get_initial_latents(
+                teacher_noise_scheduler, prompt_pair.batch_size, height, width, 1
             ).to(device, dtype=weight_dtype)
 
             add_time_ids = train_util.get_add_time_ids(
@@ -231,19 +261,44 @@ def train(
                     total_timesteps=timesteps_to,
                     guidance_scale=3,
                 )
-
+                # ちょっとデノイズされれたものが返る
+                teacher_denoised_latents = train_util.diffusion_xl(
+                    teacher_unet,
+                    teacher_noise_scheduler,
+                    teacher_latents,  # 単純なノイズのlatentsを渡す
+                    text_embeddings=train_util.concat_embeddings(
+                        prompt_pair.unconditional.text_embeds,
+                        prompt_pair.neutral.text_embeds,
+                        prompt_pair.batch_size,
+                    ),
+                    add_text_embeddings=train_util.concat_embeddings(
+                        prompt_pair.unconditional.pooled_embeds,
+                        prompt_pair.neutral.pooled_embeds,
+                        prompt_pair.batch_size,
+                    ),
+                    add_time_ids=train_util.concat_embeddings(
+                        add_time_ids, add_time_ids, prompt_pair.batch_size
+                    ),
+                    start_timesteps=0,
+                    total_timesteps=timesteps_to,
+                    guidance_scale=3,
+                )
+            teacher_noise_scheduler.set_timesteps(1000)
             noise_scheduler.set_timesteps(1000)
 
             current_timestep = noise_scheduler.timesteps[
                 int(timesteps_to * 1000 / config.train.max_denoising_steps)
             ]
+            teacher_current_timestep = teacher_noise_scheduler.timesteps[
+                int(timesteps_to * 1000 / config.train.max_denoising_steps)
+            ]
 
             # with network: の外では空のLoRAのみが有効になる
             positive_latents = train_util.predict_noise_xl(
-                unet,
-                noise_scheduler,
-                current_timestep,
-                denoised_latents,
+                teacher_unet,
+                teacher_noise_scheduler,
+                teacher_current_timestep,
+                teacher_denoised_latents,
                 text_embeddings=train_util.concat_embeddings(
                     prompt_pair.unconditional.text_embeds,
                     prompt_pair.positive.text_embeds,
@@ -260,10 +315,10 @@ def train(
                 guidance_scale=1,
             ).to(device, dtype=weight_dtype)
             neutral_latents = train_util.predict_noise_xl(
-                unet,
-                noise_scheduler,
-                current_timestep,
-                denoised_latents,
+                teacher_unet,
+                teacher_noise_scheduler,
+                teacher_current_timestep,
+                teacher_denoised_latents,
                 text_embeddings=train_util.concat_embeddings(
                     prompt_pair.unconditional.text_embeds,
                     prompt_pair.neutral.text_embeds,
@@ -280,10 +335,10 @@ def train(
                 guidance_scale=1,
             ).to(device, dtype=weight_dtype)
             unconditional_latents = train_util.predict_noise_xl(
-                unet,
-                noise_scheduler,
-                current_timestep,
-                denoised_latents,
+                teacher_unet,
+                teacher_noise_scheduler,
+                teacher_current_timestep,
+                teacher_denoised_latents,
                 text_embeddings=train_util.concat_embeddings(
                     prompt_pair.unconditional.text_embeds,
                     prompt_pair.unconditional.text_embeds,
@@ -312,12 +367,12 @@ def train(
                 current_timestep,
                 denoised_latents,
                 text_embeddings=train_util.concat_embeddings(
-                    prompt_pair.unconditional.text_embeds,
+                    prompt_pair.target_unconditional.text_embeds,
                     prompt_pair.target.text_embeds,
                     prompt_pair.batch_size,
                 ),
                 add_text_embeddings=train_util.concat_embeddings(
-                    prompt_pair.unconditional.pooled_embeds,
+                    prompt_pair.target_unconditional.pooled_embeds,
                     prompt_pair.target.pooled_embeds,
                     prompt_pair.batch_size,
                 ),
@@ -358,6 +413,8 @@ def train(
             unconditional_latents,
             target_latents,
             latents,
+
+            teacher_latents,
         )
         flush()
         
@@ -425,14 +482,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config_file",
-        required=False,
+        required=True,
         help="Config file for training.",
     )
     # config_file 'data/config.yaml'
     parser.add_argument(
         "--alpha",
         type=float,
-        required=False,
+        required=True,
         help="LoRA weight.",
     )
     # --alpha 1.0
@@ -469,11 +526,5 @@ if __name__ == "__main__":
     )
     
     args = parser.parse_args()
-    args.attributes = "chinese man,chinese woman"
-    args.name = "openXL2_3"
-    args.rank = 32
-    args.alpha = 16
-    args.config_file = "trainscripts/textsliders/data/config-xl.yaml"
-    args.device = 0
-    # --attributes "chinese man,chinese woman" --name openXL2_3 --rank 4 --alpha 1 --config_file "trainscripts/textsliders/data/config-xl.yaml" --device 0
+
     main(args)

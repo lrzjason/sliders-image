@@ -1,7 +1,10 @@
 prompts_file: "trainscripts/textsliders/data/prompts-xl.yaml"
 pretrained_model:
   # name_or_path: "F:/models/Stable-diffusion/sdxl/open_kohaku_mix_64.safetensors" # you can also use .ckpt or .safetensors models
-  name_or_path: "F:/models/Stable-diffusion/sdxl/openXL.safetensors"
+  # name_or_path: "F:/models/Stable-diffusion/sdxl/animagineXLV3_v30.safetensors"
+  # name_or_path: "F:/models/Stable-diffusion/sdxl/openxl_14.safetensors"
+  name_or_path: "F:/models/Stable-diffusion/sdxl/o2/openxl2_014.safetensors"
+  teacher_model: "F:/models/Stable-diffusion/sdxl/animagineXLV3_v30.safetensors"
   v2: false # true if model is v2.x
   v_pred: false # true if model uses v-prediction
 network:
@@ -12,18 +15,21 @@ network:
 train:
   precision: "float16"
   noise_scheduler: "ddim" # or "ddpm", "lms", "euler_a"
-  iterations: 1000
-  lr: 0.0002
+  iterations: 500
+  lr: 0.0001
   optimizer: "Adam8bit"
   lr_scheduler: "constant"
   max_denoising_steps: 50
 save:
   name: "temp"
   path: "./models"
-  per_steps: 200
+  per_steps: 100
   precision: "float16"
+  save_after_steps: 0
+  break_after_steps: 0
+  save_suffix: "o24_2"
 logging:
-  use_wandb: false
+  use_wandb: true
   verbose: true
 other:
   use_xformers: false

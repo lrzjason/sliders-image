@@ -13,6 +13,7 @@ NETWORK_TYPES = Literal["lierla", "c3lier"]
 
 class PretrainedModelConfig(BaseModel):
     name_or_path: str
+    teacher_model: str
     v2: bool = False
     v_pred: bool = False
 
@@ -45,6 +46,9 @@ class SaveConfig(BaseModel):
     path: str = "./output"
     per_steps: int = 200
     precision: PRECISION_TYPES = "float32"
+    save_after_steps: int = 0
+    break_after_steps: int = 0
+    save_suffix: str = "ggg"
 
 
 class LoggingConfig(BaseModel):

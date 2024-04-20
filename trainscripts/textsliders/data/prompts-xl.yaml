@@ -494,39 +494,25 @@
 #   dynamic_resolution: false
 #   batch_size: 1
 
-- target: "young russian man face" # what word for erasing the positive concept from
-  positive: "dark photograph of young russian man face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "young man face" # starting point for conditioning the target
+# move 1girl into anime artwork, 1girl, woman
+- target: "raw photo of chinese man with eyebags" # what word for erasing the positive concept from
+  target_unconditional: "" # word to take the difference from the positive concept
+  positive: "raw photo of man with eyebags"  # concept to erase
+  unconditional: "highlight, glasses,shiny skin,hands, made up, highlight on face, scares" # word to take the difference from the positive concept
+  neutral: "raw photo of man with eyebags" # starting point for conditioning the target
   action: "enhance" # erase or enhance
-  guidance_scale: 4
+  guidance_scale: 3.5
   resolution: 512
-  dynamic_resolution: false
+  dynamic_resolution: true
   batch_size: 1
-- target: "aged russian man face" # what word for erasing the positive concept from
-  positive: "dark photograph of aged russian man face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "aged man face" # starting point for conditioning the target
+# move 1girl into anime artwork, 1girl, woman
+- target: "raw photo of chinese woman with eyebags" # what word for erasing the positive concept from
+  target_unconditional: "" # word to take the difference from the positive concept
+  positive: "raw photo of woman with eyebags"  # concept to erase
+  unconditional: "highlight, glasses,shiny skin,hands, made up, highlight on face, scares" # word to take the difference from the positive concept
+  neutral: "raw photo of woman with eyebags" # starting point for conditioning the target
   action: "enhance" # erase or enhance
-  guidance_scale: 4
+  guidance_scale: 3.5
   resolution: 512
-  dynamic_resolution: false
-  batch_size: 1
-- target: "young russian woman face" # what word for erasing the positive concept from
-  positive: "dark photograph of young russian woman face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "young woman face" # starting point for conditioning the target
-  action: "enhance" # erase or enhance
-  guidance_scale: 4
-  resolution: 512
-  dynamic_resolution: false
-  batch_size: 1
-- target: "aged russian woman face" # what word for erasing the positive concept from
-  positive: "dark photograph of aged russian woman face with detailed skin, extremely few freckles, moles, room light, very detailed pupils, mouth"  # concept to erase
-  unconditional: "fingers,arms,cropped image, out of frame, gray,pearl skin,day light, highlight,shiny skin, 3d, anime, plastic, painting, drawing, large area of freckles, large area of moles, makeup, pink lips, red lips" # word to take the difference from the positive concept
-  neutral: "aged woman face" # starting point for conditioning the target
-  action: "enhance" # erase or enhance
-  guidance_scale: 4
-  resolution: 512
-  dynamic_resolution: false
+  dynamic_resolution: true
   batch_size: 1

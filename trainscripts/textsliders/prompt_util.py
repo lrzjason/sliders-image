@@ -43,6 +43,7 @@ class PromptEmbedsCache:  # 使いまわしたいので
 
 class PromptSettings(BaseModel):  # yaml のやつ
     target: str
+    target_unconditional: str = None
     positive: str = None   # if None, target will be used
     unconditional: str = ""  # default is ""
     neutral: str = None  # if None, unconditional will be used
@@ -58,6 +59,8 @@ class PromptSettings(BaseModel):  # yaml のやつ
         keys = values.keys()
         if "target" not in keys:
             raise ValueError("target must be specified")
+        if "target_unconditional" not in keys:
+            values["target_unconditional"] = ""
         if "positive" not in keys:
             values["positive"] = values["target"]
         if "unconditional" not in keys:
@@ -70,6 +73,7 @@ class PromptSettings(BaseModel):  # yaml のやつ
 
 class PromptEmbedsPair:
     target: PROMPT_EMBEDDING  # not want to generate the concept
+    target_unconditional: PROMPT_EMBEDDING  # target uncondition (default should be empty)
     positive: PROMPT_EMBEDDING  # generate the concept
     unconditional: PROMPT_EMBEDDING  # uncondition (default should be empty)
     neutral: PROMPT_EMBEDDING  # base condition (default should be empty)
@@ -87,6 +91,7 @@ class PromptEmbedsPair:
         self,
         loss_fn: torch.nn.Module,
         target: PROMPT_EMBEDDING,
+        target_unconditional: PROMPT_EMBEDDING,
         positive: PROMPT_EMBEDDING,
         unconditional: PROMPT_EMBEDDING,
         neutral: PROMPT_EMBEDDING,
@@ -94,6 +99,7 @@ class PromptEmbedsPair:
     ) -> None:
         self.loss_fn = loss_fn
         self.target = target
+        self.target_unconditional = target_unconditional
         self.positive = positive
         self.unconditional = unconditional
         self.neutral = neutral
@@ -160,6 +166,8 @@ def load_prompts_from_yaml(path, attributes = []):
             for att in attributes:
                 copy_ = copy.deepcopy(prompts[i])
                 copy_['target'] = att + ' ' + copy_['target']
+                # for two model concept learning
+                copy_['target_unconditional'] = att + ' ' + copy_['target_unconditional']
                 copy_['positive'] = att + ' ' + copy_['positive']
                 copy_['neutral'] = att + ' ' + copy_['neutral']
                 copy_['unconditional'] = att + ' ' + copy_['unconditional']
